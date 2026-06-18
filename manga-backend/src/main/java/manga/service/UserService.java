@@ -70,7 +70,7 @@ public class UserService {
 
     public User updateUserByAdmin(Integer id, User input) {
         User existing = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User nicht gefunden"));
+                .orElseThrow(() -> new IllegalArgumentException("User wurde nicht gefunden"));
 
         validateUniqueUser(input.getUsername(), input.getEmail(), id);
 
