@@ -51,7 +51,7 @@ public class MangaApiApplication {
 
         // Überprüfung 2: Fehlgeschlagener Login -> Liefert false (ohne Exception!)
         boolean loginFehlgeschlagen = authService.loginUser(falschesPasswordInput, gespeicherterHashAusDb);
-        System.out.println("Login mit falschem Passwort:  " + (loginFehlgeschlagen ? "ERFOLGREICH" : "FEHLGESCHLAGEN (401 Unauthorized)"));
+        System.out.println("Login mit falschem Passwort:  " + (loginFehlgeschlagen ? "ERFOLGREICH(200)" : "FEHLGESCHLAGEN (401 Unauthorized)"));
     }
 
     /**
