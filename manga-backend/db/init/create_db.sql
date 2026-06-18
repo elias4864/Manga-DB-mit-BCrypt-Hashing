@@ -115,3 +115,7 @@ INSERT IGNORE INTO user_manga (user_id, manga_id, status, rating, note) VALUES
 INSERT IGNORE INTO reading_sessions (id, user_id, manga_id, read_at, resulting_status, chapters_read, note) VALUES
 (1, 1, 2, '2026-04-15 20:00:00', 'READING', 4, 'Heute weitergelesen'),
 (2, 2, 5, '2026-04-15 21:00:00', 'COMPLETED', 6, 'Band abgeschlossen');
+
+CREATE USER IF NOT EXISTS 'manga'@'%' IDENTIFIED BY 'manga';
+GRANT ALL PRIVILEGES ON manga_db.* TO 'manga'@'%';
+FLUSH PRIVILEGES;
