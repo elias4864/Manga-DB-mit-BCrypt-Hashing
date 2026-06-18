@@ -25,11 +25,17 @@ public class MangaApiApplication {
         // 2. Den Benutzer zuerst über den Service registrieren (damit das Passwort gehasht wird)
         String loginPasswordInput = "meinSicheresPasswort123"; // Korrekt
         User neuerUser = authService.registerUser("Otaku99", "otaku@manga.de", loginPasswordInput, Role.USER);
+       String password = "fabian2024";
+        User fabian = authService.registerUser("fabilian", "fabia.imhasly@gmx.ch", password, Role.USER);
+
 
         System.out.println("\n--- LOGIN SIMULATION ---");
 
         // Die Inputs des Benutzers beim Login-Versuch
         String falschesPasswordInput = "passwort123"; // Falsch
+
+        String login = "momo9010";
+        String  hash = fabian.getPassword();
 
         // Holt jetzt den echten, funktionierenden Hash aus dem erstellten User
         String gespeicherterHashAusDb = neuerUser.getPassword();
@@ -38,6 +44,10 @@ public class MangaApiApplication {
         boolean loginErfolgreich = authService.loginUser(loginPasswordInput, gespeicherterHashAusDb);
         System.out.println("Login mit korrektem Passwort: " + (loginErfolgreich ? "ERFOLGREICH (200 OK)" : "FEHLGESCHLAGEN"));
         System.out.println("Erfolgreich eingeloggt mit dem User: " + neuerUser.getUsername());
+        boolean loginkorrekt = authService.loginUser(login,hash);
+        System.out.println("Login mit dem Password"+(loginkorrekt ? "Eroglreich": "Fehlgeschlagen"));
+
+
 
         // Überprüfung 2: Fehlgeschlagener Login -> Liefert false (ohne Exception!)
         boolean loginFehlgeschlagen = authService.loginUser(falschesPasswordInput, gespeicherterHashAusDb);
