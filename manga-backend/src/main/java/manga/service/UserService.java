@@ -35,6 +35,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User loginUser(String username, String rawpassword) {
+        User elias = userRepository.findByUsernameOrEmail(username,rawpassword);
+
+        if (elias != null && elias.getPassword().equals(rawpassword)) {
+            System.out.println("Login mit User eingellogt"+elias.getPassword());
+
+            return elias;
+        }
+        return null;
+    }
+
     public User createUserByAdmin(User input) {
         validateUniqueUser(input.getUsername(), input.getEmail(), null);
 

@@ -3,6 +3,7 @@ package manga.controller;
 import jakarta.validation.Valid;
 import manga.model.User;
 import manga.repository.UserRepository;
+import manga.service.AuthService;
 import manga.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,12 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final AuthService authService;
 
-    public UserController(UserRepository userRepository, UserService userService) {
+    public UserController(UserRepository userRepository, UserService userService, AuthService authService) {
         this.userRepository = userRepository;
         this.userService = userService;
+        this.authService = authService;
     }
 
     @GetMapping
