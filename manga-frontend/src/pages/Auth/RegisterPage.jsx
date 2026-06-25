@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "../../services/authService";
-
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -13,6 +12,11 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  function togglePasswordVisibility() {
+    setShowPassword((prev) => !prev);
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -21,6 +25,7 @@ export default function RegisterPage() {
 
     if (form.password !== form.confirmPassword) {
       setError("Passwörter stimmen nicht überein");
+      alert("Passwörter stimmen nicht überein");
       return;
     }
 
@@ -51,8 +56,8 @@ export default function RegisterPage() {
           <label htmlFor="username">Username</label>
           <input
             id="username"
-            type="text"
-            value={form.username}
+            type={showPassword ? "text" : "password"}
+            value={showPassword ? form.username : form.username}
             onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
           />
         </div>
@@ -69,19 +74,32 @@ export default function RegisterPage() {
           <label htmlFor="register-password">Passwort</label>
           <input
             id="register-password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
           />
+
+          <button type="button" onClick={togglePasswordVisibility}>
+            {showPassword ? "Passwort ausblenden" : "Passwort anzeigen"}
+          </button>
         </div>
+
+
+        <br />
+        <br />
         <div>
           <label htmlFor="confirmPassword">Passwort bestätigen</label>
           <input
             id="confirmPassword"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={form.confirmPassword}
             onChange={(event) => setForm((current) => ({ ...current, confirmPassword: event.target.value }))}
           />
+
+          <button type="button" onClick={togglePasswordVisibility}>
+            {showPassword ? "Passwort ausblenden" : "Passwort anzeigen"}
+          </button>
+
         </div>
         <button type="submit" disabled={isLoading}>
           {isLoading ? "Registriere..." : "Registrieren"}
