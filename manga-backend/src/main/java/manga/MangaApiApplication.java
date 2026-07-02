@@ -1,66 +1,94 @@
 package manga;
 
-import manga.model.Role; // Falls deine Role-Klasse in manga.model liegt
-import manga.model.User; // WICHTIG: Import für dein User-Modell
-import manga.service.AuthService;
+import manga.model.Role;
+import manga.model.User;
+import manga.service.UserService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Startklasse der Manga-API.
- * Initialisiert die Spring-Boot-Anwendung
- */
-@SpringBootApplication
 @RestController
+@SpringBootApplication
 public class MangaApiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MangaApiApplication.class, args);
+        ApplicationContext context = SpringApplication.run(MangaApiApplication.class, args);
+        UserService userService = context.getBean(UserService.class);
 
-        // 1. Instanz des AuthService erstellen
-        AuthService authService = new AuthService();
+        System.out.println("\n=== START TEST-REIHE MIT DEINEN DATENBANK-USERN ===");
 
-        // 2. Den Benutzer zuerst über den Service registrieren (damit das Passwort gehasht wird)
-        String loginPasswordInput = "meinSicheresPasswort123"; // Korrekt
-        User neuerUser = authService.registerUser("Otaku99", "otaku@manga.de", loginPasswordInput, Role.USER);
-       String password = "fabian2024";
-        User fabian = authService.registerUser("fabilian", "fabia.imhasly@gmx.ch", password, Role.USER);
+        // --- DEFINITION DER ECHTEN DATEN AUS DEINER DB ---
+        String leoName = "leo1234_user";
+        String leoPw = "leo1234";
 
+        String fabilianName = "fabilian";
+        String fabilianPw = "fabian2024";
 
-        System.out.println("\n--- LOGIN SIMULATION ---");
-
-        // Die Inputs des Benutzers beim Login-Versuch
-        String falschesPasswordInput = "passwort123"; // Falsch
-
-        String login = "momo9010";
-        String  hash = fabian.getPassword();
-
-        // Holt jetzt den echten, funktionierenden Hash aus dem erstellten User
-        String gespeicherterHashAusDb = neuerUser.getPassword();
-
-        // Überprüfung 1: Erfolgreicher Login -> Liefert true
-        boolean loginErfolgreich = authService.loginUser(loginPasswordInput, gespeicherterHashAusDb);
-        System.out.println("Login mit korrektem Passwort: " + (loginErfolgreich ? "ERFOLGREICH (200 OK)" : "FEHLGESCHLAGEN"));
-        System.out.println("Erfolgreich eingeloggt mit dem User: " + neuerUser.getUsername());
-        boolean loginkorrekt = authService.loginUser(login,hash);
-        System.out.println("Login mit dem Password"+(loginkorrekt ? "Eroglreich": "Fehlgeschlagen"));
+        String soraName = "SoraReads";
+        String soraPw = "mangaReader2026";
 
 
+        // --- SCHRITT 1: VERSUCH DER REGISTRIERUNG ---
+        System.out.println("\n[SCHRITT 1] Versuche User zu registrieren (falls noch nicht vorhanden)...");
 
-        // Überprüfung 2: Fehlgeschlagener Login -> Liefert false (ohne Exception!)
-        boolean loginFehlgeschlagen = authService.loginUser(falschesPasswordInput, gespeicherterHashAusDb);
-        System.out.println("Login mit falschem Passwort:  " + (loginFehlgeschlagen ? "ERFOLGREICH(200)" : "FEHLGESCHLAGEN (401 Unauthorized)"));
+        try {
+            userService.registerUser(fabilianName, "fabia.imhasly@gmx.ch", fabilianPw, Role.USER);
+            System.out.println("[INFO] " + fabilianName + " wurde erfolgreich frisch gehasht registriert!");
+        } catch (Exception e) {
+            System.out.println("[HINWEIS] " + fabilianName + " existiert bereits in der DB. Verwende bestehenden Eintrag.");
+        }
+
+        try {
+            userService.registerUser(soraName, "sora@manga.ch", soraPw, Role.USER);
+        } catch (Exception e) {
+            // Ignoriert Info-Meldung für kürzere Logs
+        }
+
+
+        // --- SCHRITT 2: LOGIN-SIMULATIONEN ---
+        System.out.println("\n[SCHRITT 2] Simuliere Logins mit Benutzernamen und Passwort...");
+
+        // TEST 1: leo1234_user (Bereits gehasht in DB)
+        System.out.println("\n-> Versuche Login für: " + leoName);
+        boolean leoErfolg = userService.loginUser(leoName, leoPw);
+        if (leoErfolg) {
+            System.out.println("   => STATUS: ERFOLG! Der BCrypt-Hash in der DB matched mit dem Passwort.");
+        } else {
+            System.out.println("   => STATUS: FEHLGESCHLAGEN!");
+        }
+
+        // TEST 2: fabilian (Steht im Klartext in deiner DB -> Schlägt fehl)
+        System.out.println("\n-> Versuche Login für: " + fabilianName);
+        boolean fabiErfolg = userService.loginUser(fabilianName, fabilianPw);
+        if (fabiErfolg) {
+            System.out.println("   => STATUS: ERFOLG!");
+        } else {
+            System.out.println("   => STATUS: FEHLGESCHLAGEN!");
+            System.out.println("   => GRUND: '" + fabilianName + "' hat in der Datenbank kein gehashtes Passwort.");
+
+            // HIER GENERIEREN WIR DEN PASSENDEN HASH FÜR DEINE DOKUMENTATION:
+            String neuerHash = userService.encodePassword(fabilianPw);
+            System.out.println("   => TIPP: So müsste der sichere Hash für das Passwort '" + fabilianPw + "' in der DB aussehen:");
+            System.out.println("      " + neuerHash);
+        }
+
+        // TEST 3: SoraReads (Steht im Klartext in deiner DB -> Schlägt fehl)
+        System.out.println("\n-> Versuche Login für: " + soraName);
+        boolean soraErfolg = userService.loginUser(soraName, soraPw);
+        if (!soraErfolg) {
+            String soraHash = userService.encodePassword(soraPw);
+            System.out.println("   => STATUS: FEHLGESCHLAGEN!");
+            System.out.println("   => TIPP: Generierter BCrypt-Hash für '" + soraPw + "':");
+            System.out.println("      " + soraHash);
+        }
+
+        System.out.println("\n=== TEST-REIHE BEENDET ===");
     }
 
-    /**
-     * Liefert eine einfache Willkommensnachricht.
-     *
-     * @return Willkommensnachricht
-     */
     @GetMapping("/")
     public String index() {
-        return "Willkommen bei Mangadb";
+        return "Willkommen bei der Mangadb";
     }
 }

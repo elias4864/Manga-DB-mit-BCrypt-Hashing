@@ -30,20 +30,41 @@ public class UserService {
         User user = new User();
         user.setUsername(username.trim());
         user.setEmail(normalizeEmail(email));
+        // FIX: Nur noch einmal verschlüsseln und direkt setzen
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setRole(role == null ? Role.USER : role);
+
         return userRepository.save(user);
     }
 
-    public User loginUser(String username, String rawpassword) {
-        User elias = userRepository.findByUsernameOrEmail(username,rawpassword);
-
-        if (elias != null && elias.getPassword().equals(rawpassword)) {
-            System.out.println("Login mit User eingellogt"+elias.getPassword());
-
-            return elias;
+    public void checkSoraUser(String username) {
+        Optional<User> soraOptional = userRepository.findByUsernameOrEmail(username, username);
+        if (soraOptional.isPresent()) {
+            User soraAusDb = soraOptional.get();
+            System.out.println("User gefunden: " + soraAusDb.getUsername());
+        } else {
+            System.out.println("User '" + username + "' wurde nicht in der DB gefunden.");
         }
-        return null;
+    }
+
+    public boolean loginUser(String usernameOrEmail, String inputPassword) {
+        Optional<User> userOptional = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail);
+
+        if (userOptional.isEmpty()) {
+            System.out.println("Login fehlgeschlagen: User '" + usernameOrEmail + "' existiert nicht.");
+            return false;
+        }
+
+        User user = userOptional.get();
+        boolean isPasswordCorrect = passwordEncoder.matches(inputPassword, user.getPassword());
+
+        if (isPasswordCorrect) {
+            System.out.println("Login erfolgreich für User: " + user.getUsername());
+        } else {
+            System.out.println("Login fehlgeschlagen: Passwort falsch für User: " + user.getUsername());
+        }
+
+        return isPasswordCorrect;
     }
 
     public User createUserByAdmin(User input) {
@@ -58,7 +79,7 @@ public class UserService {
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsernameIgnoreCase(username);
+        return userRepository.findByUsernameOrEmail(username, username);
     }
 
     public Optional<User> findByEmail(String email) {
