@@ -25,7 +25,7 @@ public class MangaApiApplication {
 
 
         String fabilianName = "fabilian";
-        String fabilianPw = "fabian2024";
+        String fabianpwd = "fabian1234";
 
         String soraName = "SoraReads";
         String soraPw = "mangaReader2026";
@@ -73,8 +73,20 @@ public class MangaApiApplication {
                 // Falls die Methode im Service anders heisst
             }
         try {
-            userService.registerUser(fabilianName, "fabia.imhasly@gmx.ch", fabilianPw, Role.USER);
-            System.out.println("[INFO] " + fabilianName + " wurde erfolgreich frisch gehasht registriert!");
+            // 1. Hier generieren wir den BCrypt-Hash aus dem Klartext-Passwort
+            String hashedpwdf = userService.encodePassword(fabianpwd);
+
+            System.out.println("   => SCHUTZ-MASSNAHME: Ersetze das Passwort in der DB mit diesem Hash:");
+
+            // FEHLERBEHEBUNG 1: Hier muss 'hashedpwdf' ausgegeben werden, nicht das Klartext-Passwort!
+            System.out.println("      " + hashedpwdf);
+
+            // FEHLERBEHEBUNG 2: Das gehashte (oder das Klartext-Passwort, je nach Service-Logik) übergeben.
+            // Wenn registerUser das Hashing intern übernimmt, übergib 'fabilianPw'.
+            // Wenn registerUser das fertige Passwort will, übergib 'hashedpwdf'.
+            userService.registerUser(fabilianName, "fabia.imhasly@gmx.ch", fabianpwd,Role.USER);
+
+            System.out.println("[INFO] " + fabilianName + " wurde erfolgreich frisch registriert!");
         } catch (Exception e) {
             System.out.println("[HINWEIS] " + fabilianName + " existiert bereits in der DB oder Registrierung übersprungen.");
         }
@@ -111,7 +123,7 @@ public class MangaApiApplication {
 
         // TEST 2: fabilian
         System.out.println("\n-> Versuche Login für: " + fabilianName);
-        boolean fabiErfolg = userService.loginUser(fabilianName, fabilianPw);
+        boolean fabiErfolg = userService.loginUser(fabilianName, fabianpwd);
         if (fabiErfolg) {
             System.out.println("   => STATUS: ERFOLG! Login klappt.");
         } else {
@@ -120,8 +132,8 @@ public class MangaApiApplication {
 
             // BCrypt-Hash Generator als Fallback für die Doku
             try {
-                String neuerHash = userService.encodePassword(fabilianPw);
-                System.out.println("   => TIPP: So müsste der sichere Hash für das Passwort '" + fabilianPw + "' in der DB aussehen:");
+                String neuerHash = userService.encodePassword(fabianpwd);
+                System.out.println("   => TIPP: So müsste der sichere Hash für das Passwort '" + fabianpwd + "' in der DB aussehen:");
                 System.out.println("      " + neuerHash);
             } catch (Exception e) {
                 System.out.println("   => [HINWEIS] encodePassword-Methode im Service nicht verfügbar.");
